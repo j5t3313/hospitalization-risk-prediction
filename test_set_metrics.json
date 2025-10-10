@@ -1,0 +1,17 @@
+{
+  "dataset": "test_set",
+  "total_patients": 23271,
+  "actual_hospitalizations": 3766,
+  "hospitalization_rate": 0.16183232349275922,
+  "model_name": "Gradient Boosting",
+  "threshold": 0.2,
+  "roc_auc": 0.7561167779330791,
+  "pr_auc": 0.34565715468615166,
+  "precision": 0.29709974062721056,
+  "recall": 0.6691449814126395,
+  "f1_score": 0.4114957544088831,
+  "patients_flagged": 8482,
+  "flag_rate": 0.36448798934295906,
+  "positive_predictive_value": 0.29709974062721056,
+  "sensitivity": 0.6691449814126395
+}
