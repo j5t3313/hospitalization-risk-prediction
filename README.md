@@ -112,7 +112,7 @@ Threshold 0.20 selected for optimal F1 score.
 
 Single evaluation on held-out test set confirmed performance.
 
-## 🎛️ Threshold Selection Guide
+## Threshold Selection Guide
 
 Choose threshold based on operational capacity:
 
@@ -167,7 +167,7 @@ Model provides four risk tiers:
 | High Risk | 29.2% | 29.1% | 18,740 |
 | Very High Risk | 42.2% | 44.3% | 8,728 |
 
-## 📝 Notebooks
+##  Notebooks
 
 ### 01_data_exploration.ipynb
 - Population demographics analysis
@@ -189,7 +189,7 @@ Model provides four risk tiers:
 - Threshold adjustment demonstrations
 - Operational deployment guidance
 
-## 🛠️ API Reference
+##  API Reference
 
 ### HospitalizationRiskPredictor
 
@@ -211,7 +211,7 @@ options = predictor.get_threshold_options()
 print(options[['threshold', 'recall', 'precision', 'flagged_pct']])
 ```
 
-## 📦 Data Requirements
+##  Data Requirements
 
 Model requires 36 features per prediction:
 
@@ -232,7 +232,7 @@ Model requires 36 features per prediction:
 
 See `predictor.get_feature_requirements()` for complete list.
 
-## ⚠️ Limitations
+##  Limitations
 
 1. **Synthetic Data**: Trained on CMS DE-SynPUF synthetic dataset. Real-world validation required before clinical deployment.
 
