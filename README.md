@@ -21,8 +21,6 @@ This project develops a Gradient Boosting model that:
 | Precision @ 0.20 | - | 0.2840 | 0.2943 |
 | F1 Score @ 0.20 | - | 0.3982 | 0.4091 |
 
-The close alignment across all three sets confirms good generalization without overfitting.
-
 ### Installation
 
 ```bash
