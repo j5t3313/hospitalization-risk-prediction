@@ -21,6 +21,30 @@ This project develops a Gradient Boosting model that:
 | Precision @ 0.20 | - | 0.2840 | 0.2943 |
 | F1 Score @ 0.20 | - | 0.3982 | 0.4091 |
 
+## Project Structure
+
+```
+hospitalization-risk-prediction/
+├── data/
+│   └── hospitalization_risk_data.csv
+├── notebooks/
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_model_training.ipynb
+│   └── 03_deployment.ipynb
+├── src/
+│   └── predictor.py
+├── models/
+│   └── hospitalization_risk_model_gradient_boosting_balanced.pkl
+├── results/
+│   ├── test_set_metrics.json
+│   ├── full_dataset_metrics.json
+│   └── patient_risk_predictions.csv
+├── requirements.txt
+├── README.md
+├── LICENSE
+└── .gitignore
+```
+
 ### Installation
 
 ```bash
