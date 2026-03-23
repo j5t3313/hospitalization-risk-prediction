@@ -3,15 +3,16 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A machine learning system for predicting 12-month hospitalization risk in senior living facilities using Medicare claims data. 
-##  Project Overview
+A machine learning project predicting 12-month hospitalization risk in senior living facilities using Medicare claims data.
+
+## Project Overview
 
 This project develops a Gradient Boosting model that:
 - Achieves **0.7558 ROC-AUC** on held-out test data
 - Identifies **67.1% of hospitalizations** at recommended threshold
-- Provides **risk stratification** across four tiers (Low, Moderate, High, Very High)
+- Provides **risk stratification** across four calibrated tiers (Low, Moderate, High, Very High)
 
-##  Performance Metrics
+## Performance Metrics
 
 | Metric | Training CV | Validation | Test |
 |--------|-------------|------------|------|
@@ -28,89 +29,55 @@ hospitalization-risk-prediction/
 ├── data/
 │   └── hospitalization_risk_data.csv
 ├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_model_training.ipynb
-│   └── 03_deployment.ipynb
-├── src/
-│   └── predictor.py
+│   ├── 01_data_preparation.ipynb
+│   └── 02_model_training.ipynb
+├── figures/
+│   ├── eda_hospitalization_risk.png
+│   ├── correlation_matrix.png
+│   ├── roc_pr_curves.png
+│   ├── threshold_analysis.png
+│   ├── confusion_matrices.png
+│   └── feature_importance.png
 ├── models/
-│   └── hospitalization_risk_model_gradient_boosting_balanced.pkl
-├── results/
-│   ├── test_set_metrics.json
-│   ├── full_dataset_metrics.json
-│   └── patient_risk_predictions.csv
+│   └── hospitalization_risk_model.pkl
+├── Hospitalization_Risk_Model.ipynb      # Project writeup
 ├── requirements.txt
 ├── README.md
-├── LICENSE
-└── .gitignore
+└── LICENSE
 ```
 
-### Installation
+### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/hospitalization-risk-prediction.git
 cd hospitalization-risk-prediction
 
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Basic Usage
+## Data
 
-```python
-from src.predictor import HospitalizationRiskPredictor
+The analysis uses the CMS DE-SynPUF (Synthetic Public Use Files) Sample 1 dataset, which mimics real Medicare claims while protecting patient privacy.
 
-# Load the trained model
-predictor = HospitalizationRiskPredictor(
-    'models/hospitalization_risk_model_gradient_boosting_balanced.pkl',
-    threshold=0.20
-)
-
-# Predict for a single patient
-patient_data = {
-    'age': 78,
-    'num_chronic_conditions': 4,
-    'baseline_hospital_admits': 1.0,
-    'baseline_er_visits': 0.5,
-    # ... other 32 features
-}
-
-result = predictor.predict(patient_data)
-print(f"Risk: {result['probability']:.1%}")
-print(f"Risk Level: {result['risk_level']}")
-print(f"High Risk Flag: {result['high_risk_flag']}")
+**Temporal Structure:**
+```
+[2008: Feature Calculation Period] → [Prediction Point: Jan 1, 2009] → [2009: Outcome Period]
 ```
 
-### Batch Predictions
+**Dataset:** 116,352 patients | 36 features | 16.2% positive class (18,816 hospitalizations)
 
-```python
-import pandas as pd
-
-# Load patient data
-patients_df = pd.read_csv('data/patients.csv')
-
-# Generate predictions for all patients
-predictions_df = predictor.batch_predict(patients_df)
-
-# Filter high-risk patients
-high_risk = predictions_df[predictions_df['high_risk_flag'] == 1]
-print(f"High-risk patients: {len(high_risk)} ({len(high_risk)/len(patients_df)*100:.1f}%)")
-```
-
-##  Model Development Process
+## Model Development Process
 
 ### 1. Data Splitting
 
 ```
 Total: 116,352 patients
-├── Training: 81,445 (70%) - model training & hyperparameter tuning
-├── Validation: 11,636 (10%) - threshold optimization ONLY
-└── Test: 23,271 (20%) - final evaluation (touched once)
+├── Training: 81,445 (70%) — model training & hyperparameter tuning
+├── Validation: 11,636 (10%) — threshold optimization only
+└── Test: 23,271 (20%) — final evaluation (touched once)
 ```
 
 ### 2. Model Training
@@ -122,7 +89,7 @@ Total: 116,352 patients
 
 ### 3. Threshold Optimization
 
-Tested 9 thresholds (0.10 to 0.50) on validation set:
+Tested 9 thresholds (0.10–0.50) on validation set:
 
 | Threshold | Recall | Precision | F1 | Population Flagged |
 |-----------|--------|-----------|----|--------------------|
@@ -134,37 +101,9 @@ Threshold 0.20 selected for optimal F1 score.
 
 ### 4. Final Evaluation
 
-Single evaluation on held-out test set confirmed performance.
+Single evaluation on held-out test set confirmed generalization (ROC-AUC within 0.006 of CV estimate).
 
-## Threshold Selection Guide
-
-Choose threshold based on operational capacity:
-
-### High Recall (0.15)
-- **Use Case**: Facilities with robust nursing ratios
-- **Flags**: 52% of population
-- **Catches**: 84% of hospitalizations
-- **Precision**: 26%
-
-### Balanced (0.20) - Recommended
-- **Use Case**: Standard care coordination programs
-- **Flags**: 37% of population
-- **Catches**: 67% of hospitalizations
-- **Precision**: 29%
-
-### High Precision (0.25)
-- **Use Case**: Limited resources or phased rollout
-- **Flags**: 24% of population
-- **Catches**: 49% of hospitalizations
-- **Precision**: 33%
-
-```python
-# Adjust threshold dynamically
-predictor.set_threshold(0.15)  # Higher recall
-predictor.set_threshold(0.25)  # Higher precision
-```
-
-##  Key Features
+## Key Features
 
 The model uses 36 features across three categories:
 
@@ -180,9 +119,9 @@ The model uses 36 features across three categories:
 - **Clinical**: Chronic conditions, disease indicators, comorbidity scores
 - **Utilization**: Hospital admits, ER visits, outpatient visits, costs
 
-##  Risk Stratification
+## Risk Stratification
 
-Model provides four risk tiers:
+The model provides four calibrated risk tiers:
 
 | Risk Level | Predicted Probability | Actual Rate | Patient Count |
 |------------|----------------------|-------------|---------------|
@@ -191,86 +130,37 @@ Model provides four risk tiers:
 | High Risk | 29.2% | 29.1% | 18,740 |
 | Very High Risk | 42.2% | 44.3% | 8,728 |
 
-##  Notebooks
+## Notebooks
 
-### 01_data_exploration.ipynb
-- Population demographics analysis
-- Feature correlation analysis
-- Class distribution assessment
-- Baseline utilization patterns
+### 01_data_preparation.ipynb
+- CMS SynPUF data loading and processing
+- Demographic and chronic condition feature engineering
+- Baseline utilization feature extraction
+- Composite feature creation
+- Exploratory data analysis and correlation analysis
 
 ### 02_model_training.ipynb
-- Three-way data split implementation
+- Three-way stratified data split
 - Cross-validation and hyperparameter tuning
 - Model comparison (Logistic Regression, Random Forest, Gradient Boosting)
+- Class imbalance treatment and impact analysis
 - Threshold optimization on validation set
-- Final test set evaluation
+- Final test set evaluation and visualizations
 
-### 03_deployment.ipynb
-- Model loading and API demonstration
-- Single patient predictions
-- Batch processing examples
-- Threshold adjustment demonstrations
-- Operational deployment guidance
+### Hospitalization_Risk_Model.ipynb
+- Full project writeup with methodology, results, and analysis
 
-##  API Reference
+## Limitations
 
-### HospitalizationRiskPredictor
-
-```python
-class HospitalizationRiskPredictor:
-    def __init__(self, model_path: str, threshold: float = 0.20)
-    def predict(self, patient_data: Union[Dict, pd.DataFrame]) -> Dict
-    def batch_predict(self, dataframe: pd.DataFrame) -> pd.DataFrame
-    def set_threshold(self, new_threshold: float) -> None
-    def get_threshold_options(self) -> pd.DataFrame
-    def get_feature_requirements(self) -> List[str]
-    def get_model_info(self) -> Dict
-```
-
-### Example: Get Threshold Options
-
-```python
-options = predictor.get_threshold_options()
-print(options[['threshold', 'recall', 'precision', 'flagged_pct']])
-```
-
-##  Data Requirements
-
-Model requires 36 features per prediction:
-
-**Demographics (2 features)**
-- Age
-- Gender (encoded)
-
-**Clinical Characteristics (14 features)**
-- Number of chronic conditions
-- Individual condition flags (CHF, diabetes, COPD, etc.)
-- Composite risk scores
-
-**Healthcare Utilization (20 features)**
-- Baseline hospital admissions
-- ER visits
-- Outpatient visits
-- Costs and utilization scores
-
-See `predictor.get_feature_requirements()` for complete list.
-
-##  Limitations
-
-1. **Synthetic Data**: Trained on CMS DE-SynPUF synthetic dataset. Real-world validation required before clinical deployment.
-
+1. **Synthetic Data**: Trained on CMS DE-SynPUF synthetic dataset. Real-world validation required before any clinical use.
 2. **Class Imbalance**: Despite balancing techniques, expect ~70% of flagged patients to not be hospitalized (precision ~30%).
-
-3. **Temporal Decay**: Model requires quarterly retraining to maintain performance as patterns shift.
-
+3. **Temporal Decay**: Model would require regular retraining to maintain performance as healthcare patterns shift.
 4. **Feature Availability**: Requires access to complete EHR data including diagnosis history and utilization metrics.
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
+This project is licensed under the MIT License — see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Note**: This model is for research and educational purposes. Clinical deployment requires validation on actual facility data and appropriate regulatory approvals.
+**Note**: This model was developed for research and educational purposes using synthetic data. Any clinical application would require validation on actual facility data.
